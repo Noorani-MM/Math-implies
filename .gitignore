@@ -1,0 +1,9 @@
+# IDE configuration
+/.idea
+/.vscode
+
+# vendor and installation
+/vendor
+
+# App
+composer.lock
