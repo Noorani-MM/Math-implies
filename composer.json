@@ -7,7 +7,12 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "NooraniMm\\MathImplies\\": "src/"
+            "Math\\Implies\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Math\\Tests\\": "tests/"
         }
     },
     "authors": [
