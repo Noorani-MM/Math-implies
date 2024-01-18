@@ -27,7 +27,7 @@ class Operator
             $operator = self::getOperatorByValue($operator);
         }
         if (! array_key_exists($operator, self::TYPES)) {
-            throw new OperatorNotFoundException("Operator : {$operator} not defined !");
+            throw new OperatorNotFoundException("Operator not defined !");
         }
 
         return match ($operator) {
