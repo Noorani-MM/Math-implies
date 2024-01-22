@@ -21,13 +21,13 @@ class Operator
     /**
      * @throws OperatorNotFoundException
      */
-    public static function proposition(bool $prior, bool $q, string|int $operator): bool
+    public static function proposition(bool $prior, bool $q, string $operator): bool
     {
-        if (is_int($operator)) {
+        if (preg_match('/\d/', $operator)) {
             $operator = self::getOperatorByValue($operator);
         }
-        if (! array_key_exists($operator, self::TYPES)) {
-            throw new OperatorNotFoundException("Operator not defined !");
+        if (! in_array($operator, array_keys(self::TYPES))) {
+            throw new OperatorNotFoundException("Operator: {$operator} not defined !");
         }
 
         return match ($operator) {
@@ -35,7 +35,6 @@ class Operator
             '<->'   => $prior === $q,
             '->'    => $prior <= $q,
             'v'     => $prior || $q,
-            default => false,
         };
     }
 }
