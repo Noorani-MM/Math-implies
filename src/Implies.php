@@ -28,20 +28,62 @@ class Implies
             $char = $sentence[$i];
             if (preg_match('/[a-zA-Z]/', $char)) {
                 if (!array_key_exists($char, $this->words)) {
-                    $this->words[$char] = false;
-                    $this->propositions[] = $char;
+                    $this->words[] = $char;
+                    if ($i > 0 && $sentence[$i - 1] !== '~') {
+                        $this->propositions[] = $char;
+                    }
                 }
             }
-            elseif ($char === "~") {
-                $char = $sentence[$i+1];
-                $this->words[$char] = true;
-                if (!in_array("~{$char}", $this->propositions)) {
-                    $this->propositions[] = "~{$char}";
+            elseif ($char === '~') {
+                $char = "~{$sentence[$i+1]}";
+                if (!in_array($char, $this->propositions)) {
+                    $this->propositions[] = $char;
                 }
             }
             elseif (in_array($char, Operator::TYPES)) {
                 $this->operators++;
             }
         }
+    }
+
+    /**
+     * @throws Exceptions\StackException
+     */
+    public function prefix(): string
+    {
+        $stack = new Stack();
+        $data = "";
+        $chars = str_split($this->sentence);
+
+        for ($i = 0; $i < count($chars); $i++) {
+            $char = $chars[$i];
+            if ($char === '(' || preg_match('/\d/', $char)) {
+                # posh {$char} and TopOfStack is : {$stack->topOfStack()}<br />
+                $stack->push($char);
+            }
+            elseif (preg_match('/[a-zA-Z]/', $char) && $i > 0 && $chars[$i-1] != '~') {
+                # append to {$data}<br />
+                $data .= $char;
+            }
+            elseif (preg_match('/[a-zA-Z]/', $char) || ($i > 0 && $chars[$i-1] == '~')) {
+                $data .= "~{$char}";
+            }
+            elseif ($char === ')') {
+                # pop {$pop} and TopOfStack is : {$stack->topOfStack()}<br />
+                do {
+                    $pop = $stack->pop();
+                } while ($pop === '(');
+                $data .= $pop;
+            }
+        }
+        while ($stack->topOfStack() > -1) {
+            $pop = $stack->pop();
+            if ($pop === '(') {
+                continue;
+            }
+            $data .= $pop;
+        }
+
+        return $data;
     }
 }
