@@ -6,12 +6,11 @@ use Math\Implies\Exceptions\StackException;
 
 class Stack
 {
-    private array $_stack;
+    private array $_stack = [];
     private int $_topOfStack = -1;
 
     public function push(string $item) {
-        $this->_stack[] = $item;
-        $this->_topOfStack++;
+        $this->_stack[++$this->_topOfStack] = $item;
     }
 
     /**
@@ -22,7 +21,7 @@ class Stack
             throw new StackException('Stack underflow: Stack is empty !');
         }
         $result = $this->_stack[$this->_topOfStack];
-        unset($this->_stack[$this->_topOfStack--]);
+        $this->_topOfStack--;
         return $result;
     }
 
