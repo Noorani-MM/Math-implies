@@ -28,7 +28,7 @@ class ImpliesTest extends TestCase
         $table2 =  ["001","011","100","111"];
 
         $case3 = new Implies('p->!q');
-        $table3 =  ["001", "011", "101", "110"];
+        $table3 =  ["0011", "0110", "1011", "1100"];
 
         $this->assertEquals($table1, $case1->table());
         $this->assertEquals($table2, $case2->table());

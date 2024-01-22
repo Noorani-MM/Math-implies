@@ -38,7 +38,7 @@ class Implies
                 if (!in_array($char, $this->words)) {
                     $this->words[] = $char;
                 }
-                elseif ($i > 0 && $sentence[$i - 1] === '~') {
+                if ($i > 0 && $sentence[$i - 1] === '~') {
                     if (!in_array($char, $this->negatives)) {
                         $this->negatives[] = $char;
                     }
