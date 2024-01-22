@@ -8,6 +8,9 @@ class Implies
     protected array $negatives = [], $words = [];
     protected string $prefix = "";
 
+    /**
+     * @throws Exceptions\StackException
+     */
     public function __construct(protected string $sentence)
     {
         $this->sentence = self::sentence_convertor($this->sentence);
@@ -90,7 +93,8 @@ class Implies
     /**
      * @throws Exceptions\StackException
      */
-    public function table() {
+    public function table(): array
+    {
         $binaries = Binary::binariesTillNumber(2** count($this->words)-1);
         $result = [];
         $prefix = $this->prefix;
