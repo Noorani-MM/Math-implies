@@ -4,8 +4,8 @@ namespace Math\Implies;
 
 class Implies
 {
-    protected int $operator, $words, $proposition;
-    protected array $propositionList, $wordList;
+    protected int $operators = 0;
+    protected array $propositions = [], $words = [];
 
     public function __construct(protected string $sentence)
     {
@@ -17,36 +17,31 @@ class Implies
     {
         $sentence = str_replace(' ', '', $sentence);
         $sentence = str_replace('.', '', $sentence);
-        $sentence = str_replace('~', '!', $sentence);
+        $sentence = str_replace('!', '~', $sentence);
         return str_replace(array_keys(Operator::TYPES), Operator::TYPES, $sentence);
     }
 
     private function detector() {
         $sentence = $this->sentence;
-        $wordsList = [];
-        $propositionList = [];
 
-        for ($i =0; $i < strlen($sentence); $i++) {
+        for ($i = 0; $i < strlen($sentence); $i++) {
             $char = $sentence[$i];
-            if (preg_match('/[a-zA-z]', $char)) {
-                if (!in_array($char, $wordsList)) {
-                    $wordsList[] = $char;
-                    $propositionList[] = $char;
+            if (preg_match('/[a-zA-Z]/', $char)) {
+                if (!array_key_exists($char, $this->words)) {
+                    $this->words[$char] = false;
+                    $this->propositions[] = $char;
                 }
             }
-            elseif ($char === "!") {
-                $char = '!'.$sentence[$i+1];
-                if (!in_array($char, $propositionList)) {
-                    $propositionList[] = $char;
+            elseif ($char === "~") {
+                $char = $sentence[$i+1];
+                $this->words[$char] = true;
+                if (!in_array("~{$char}", $this->propositions)) {
+                    $this->propositions[] = "~{$char}";
                 }
             }
-            elseif (preg_match('/\d', $char)) {
-                $this->operator++;
+            elseif (in_array($char, Operator::TYPES)) {
+                $this->operators++;
             }
         }
-        $this->words = count($wordsList);
-        $this->proposition = count($propositionList);
-        $this->wordList = $wordsList;
-        $this->propositionList = $propositionList;
     }
 }
