@@ -26,4 +26,20 @@ class Binary
 
         return $result;
     }
+
+    public static function binariesTillNumber(int $max, array $list = []): array
+    {
+        if (count($list) === $max + 1) {
+            return $list;
+        }
+        $currentNumber = count($list);
+        $binary = self::getbinary($currentNumber);
+        $length = 2;
+        while (2**$length <= $max) {
+            $length++;
+        }
+        $list[] = str_pad($binary, $length, '0', STR_PAD_LEFT);
+
+        return self::binariesTillNumber($max, $list);
+    }
 }
