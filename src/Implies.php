@@ -5,8 +5,8 @@ namespace Math\Implies;
 class Implies
 {
     protected int $operators = 0;
-    protected array $negatives = [], $words = [];
-    protected string $prefix = "";
+    protected array $negatives = [], $words = [], $table, $pdnf, $pcnf;
+    protected string $prefix;
 
     /**
      * @throws Exceptions\StackException
@@ -14,7 +14,7 @@ class Implies
     public function __construct(protected string $sentence)
     {
         $this->sentence = self::sentence_convertor($this->sentence);
-        $this->detector();
+        $this->compiler();
     }
 
     public static function sentence_convertor(string $sentence): string
@@ -28,7 +28,7 @@ class Implies
     /**
      * @throws Exceptions\StackException
      */
-    private function detector() {
+    private function compiler() {
         $sentence = $this->sentence;
 
         for ($i = 0; $i < strlen($sentence); $i++) {
@@ -49,7 +49,7 @@ class Implies
                 $this->operators++;
             }
         }
-        $this->prefix = $this->prefix();
+        $this->prefix();
     }
 
     /**
@@ -57,6 +57,9 @@ class Implies
      */
     public function prefix(): string
     {
+        if (isset($this->prefix)) {
+            return $this->prefix;
+        }
         $stack = new Stack();
         $data = "";
         $chars = str_split($this->sentence);
@@ -87,6 +90,8 @@ class Implies
             $data .= $pop;
         }
 
+        $this->prefix = $data;
+
         return $data;
     }
 
@@ -95,6 +100,9 @@ class Implies
      */
     public function table(): array
     {
+        if (isset($this->table)) {
+            return $this->table;
+        }
         $binaries = Binary::binariesTillNumber(2** count($this->words)-1);
         $result = [];
         $prefix = $this->prefix;
@@ -137,7 +145,33 @@ class Implies
             $result[] = implode('', $binary_chars);
         }
 
+        $this->table = $result;
+
         return $result;
+    }
+
+    public function minterm(): array
+    {
+        if (!isset($this->table)) {
+            $this->table();
+        }
+        if (isset($this->pdnf)) {
+            return $this->pdnf;
+        }
+        $pdnf = [];
+
+        $cursor = strlen($this->table[0]) - count($this->negatives);
+
+        foreach ($this->table as $row) {
+            if ($row[$cursor - 1] === "1") {
+                $str_split = str_split($row);
+                $fields = array_splice($str_split, 0, count($this->words));
+                $minterm[] = Binary::getnumber(implode('', $fields));
+            }
+        }
+        $this->minterm = $minterm;
+
+        return $minterm;
     }
 
     protected function getIndexOfWord(string|int $item): bool|int|string
