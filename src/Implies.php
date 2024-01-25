@@ -5,7 +5,7 @@ namespace Math\Implies;
 class Implies
 {
     protected int $operators = 0;
-    protected array $negatives = [], $words = [], $table, $pdnf, $pcnf;
+    protected array $negatives = [], $words = [], $table, $minterm, $maxterm,$pdnf, $pcnf;
     protected string $prefix;
 
     /**
@@ -158,7 +158,7 @@ class Implies
         if (isset($this->pdnf)) {
             return $this->pdnf;
         }
-        $pdnf = [];
+        $minterm = [];
 
         $cursor = strlen($this->table[0]) - count($this->negatives);
 
@@ -172,6 +172,27 @@ class Implies
         $this->minterm = $minterm;
 
         return $minterm;
+    }
+
+    public function maxterm(): array
+    {
+        if (!isset($this->table)) {
+            $this->table();
+        }
+        $maxterm = [];
+
+        $cursor = strlen($this->table[0]) - count($this->negatives);
+
+        foreach ($this->table as $row) {
+            if ($row[$cursor - 1] === "0") {
+                $str_split = str_split($row);
+                $fields = array_splice($str_split, 0, count($this->words));
+                $maxterm[] = Binary::getnumber(implode('', $fields));
+            }
+        }
+        $this->maxterm = $maxterm;
+
+        return $maxterm;
     }
 
     protected function getIndexOfWord(string|int $item): bool|int|string
