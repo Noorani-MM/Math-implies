@@ -61,8 +61,6 @@ class Implies
     {
         $this->sentence = self::sentence_convertor($this->sentence);
         $this->compiler();
-        $this->minterm();
-        $this->maxterm();
     }
 
     public static function sentence_convertor(string $sentence): string
@@ -170,9 +168,6 @@ class Implies
 
     public function minterm(): string
     {
-        if (!isset($this->rows)) {
-            $this->rows();
-        }
         if (isset($this->minterm)) {
             $minterm = implode(',', $this->minterm);
             return "Σ($minterm)";
@@ -196,9 +191,6 @@ class Implies
 
     public function maxterm(): string
     {
-        if (!isset($this->rows)) {
-            $this->rows();
-        }
         if (isset($this->maxterm)) {
             $maxterm = implode(',', $this->maxterm);
             return "π($maxterm)";
@@ -249,8 +241,20 @@ class Implies
      * @throws Exceptions\StackException
      */
     private function compiler() {
+        // Sorted by priority Step 1
         $this->words_compiler();
         $this->prefix();
+
+        // Step 2
+        $this->rows();
+
+        // Step 3
+        $this->minterm();
+        $this->maxterm();
+
+        // Step 4
+        $this->pdnf();
+        $this->pcnf();
     }
 
     private function words_compiler() {
@@ -274,5 +278,51 @@ class Implies
                 $this->operators++;
             }
         }
+    }
+
+    public function pdnf(): string
+    {
+        if (isset($this->pdnf)) {
+            return join('v', $this->pdnf);
+        }
+        $words = $this->words;
+        $count = count($words);
+
+        foreach ($this->minterm as $item) {
+            $value = Binary::getbinary($item);
+            $value = str_pad($value, $count, '0', STR_PAD_LEFT);
+            $value = str_split($value);
+            $row = [];
+
+            foreach ($value as $key => $v) {
+                $row[] = $v === "1" ? $this->words[$key] : '~'.$this->words[$key];
+            }
+            $row = join('^', $row);
+            $this->pdnf[] = "({$row})";
+        }
+        return join('v', $this->pdnf);
+    }
+
+    public function pcnf(): string
+    {
+        if (isset($this->pcnf)) {
+            return join('v', $this->pcnf);
+        }
+        $words = $this->words;
+        $count = count($words);
+
+        foreach ($this->maxterm as $item) {
+            $value = Binary::getbinary($item);
+            $value = str_pad($value, $count, '0', STR_PAD_LEFT);
+            $value = str_split($value);
+            $row = [];
+
+            foreach ($value as $key => $v) {
+                $row[] = $v === "1" ? $this->words[$key] : '~'.$this->words[$key];
+            }
+            $row = join('v', $row);
+            $this->pcnf[] = "({$row})";
+        }
+        return join('^', $this->pcnf);
     }
 }
