@@ -148,8 +148,8 @@ class Implies
                     $c2 = $stack->pop();
                     $c1 = $stack->pop();
 
-                    $word2 = $this->getIndexOfWord(str_replace('~', '', $c2));
                     $word1 = $this->getIndexOfWord(str_replace('~', '', $c1));
+                    $word2 = $this->getIndexOfWord(str_replace('~', '', $c2));
 
                     $bin1 = $binary_chars[$word1] == $this->checkIsNegative($c1) ? "0" : "1";
                     $bin2 = $binary_chars[$word2] == $this->checkIsNegative($c2) ? "0" : "1";
@@ -179,7 +179,7 @@ class Implies
         }
         $minterm = [];
 
-        $cursor = strlen($this->rows[0]) - count($this->negatives);
+        $cursor = strlen($this->rows[0]);
 
         foreach ($this->rows as $row) {
             if ($row[$cursor - 1] === "1") {
@@ -205,7 +205,7 @@ class Implies
         }
         $maxterm = [];
 
-        $cursor = strlen($this->rows[0]) - count($this->negatives);
+        $cursor = strlen($this->rows[0]);
 
         foreach ($this->rows as $row) {
             if ($row[$cursor - 1] === "0") {
