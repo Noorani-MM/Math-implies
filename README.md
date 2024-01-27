@@ -1,6 +1,6 @@
 # Math Implies 
 
-This package facilitates the solution of discrete mathematical problems
+This package facilitates the solution of discrete mathematical problems.
 
 ## How to install
 

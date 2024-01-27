@@ -1,9 +1,10 @@
 {
     "name": "noorani-mm/math-implies",
-    "description": "This package provided to calculate implies",
+    "description": "This package facilitates the solution of discrete mathematical problems.",
     "require-dev": {
         "phpunit/phpunit": "^9.0"
     },
+    "minimum-stability": "stable",
     "type": "library",
     "license": "MIT",
     "autoload": {
