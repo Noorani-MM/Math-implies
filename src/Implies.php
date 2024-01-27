@@ -30,6 +30,11 @@ class Implies
     public array $columns;
 
     /**
+     * @var array $table columns with rows
+     */
+    public array $table = [];
+
+    /**
      * @var array $minterm List of numbers in the table when final result is True
      */
     public array $minterm;
@@ -116,6 +121,7 @@ class Implies
 
     /**
      * @throws Exceptions\StackException
+     * @throws Exceptions\OperatorNotFoundException
      */
     public function rows(): array
     {
@@ -159,6 +165,7 @@ class Implies
                 }
             }
             $result[] = implode('', $binary_chars);
+            $this->table[] = $binary_chars;
         }
 
         $this->rows = $result;
@@ -205,6 +212,9 @@ class Implies
             if (!in_array($pop, $this->columns)) {
                 $this->columns[] = $pop;
             }
+        }
+        if (!in_array($this->columns, $this->table)) {
+            $this->table[] = $this->columns;
         }
 
         return $this->columns;
@@ -290,8 +300,8 @@ class Implies
         $this->prefix();
 
         // Step 2
-        $this->rows();
         $this->columns();
+        $this->rows();
 
         // Step 3
         $this->minterm();
