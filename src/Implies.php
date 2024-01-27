@@ -4,8 +4,54 @@ namespace Math\Implies;
 
 class Implies
 {
+    /**
+     * @var int $operators This is count of operators in the sentence
+     */
     protected int $operators = 0;
-    protected array $negatives = [], $words = [], $table, $minterm, $maxterm,$pdnf, $pcnf;
+
+    /**
+     * @var array $negatives List of negative words
+     */
+    protected array $negatives = [];
+
+    /**
+     * @var array $words List of available words
+     */
+    protected array $words = [];
+
+    /**
+     * @var array $rows of the table
+     */
+    protected array $rows;
+
+    /**
+     * @var array $columns what column exists in the table
+     */
+    protected array $columns;
+
+    /**
+     * @var array $minterm List of numbers in the table when final result is True
+     */
+    public array $minterm;
+
+    /**
+     * @var array $maxterm List of numbers in the table when final result is False
+     */
+    public array $maxterm;
+
+    /**
+     * @var array $pdnf
+     */
+    public array $pdnf;
+
+    /**
+     * @var array $pcnf
+     */
+    public array $pcnf;
+
+    /**
+     * @var string $prefix of the sentence to calculate content
+     */
     protected string $prefix;
 
     /**
@@ -15,6 +61,8 @@ class Implies
     {
         $this->sentence = self::sentence_convertor($this->sentence);
         $this->compiler();
+        $this->minterm();
+        $this->maxterm();
     }
 
     public static function sentence_convertor(string $sentence): string
@@ -23,33 +71,6 @@ class Implies
         $sentence = str_replace('.', '', $sentence);
         $sentence = str_replace('!', '~', $sentence);
         return str_replace(array_keys(Operator::TYPES), Operator::TYPES, $sentence);
-    }
-
-    /**
-     * @throws Exceptions\StackException
-     */
-    private function compiler() {
-        $sentence = $this->sentence;
-
-        for ($i = 0; $i < strlen($sentence); $i++) {
-            $char = $sentence[$i];
-            if ($char === '~') continue;
-            if (preg_match('/[a-zA-Z]/', $char)) {
-                if (!in_array($char, $this->words)) {
-                    $this->words[] = $char;
-                }
-                if ($i > 0 && $sentence[$i - 1] === '~') {
-                    if (!in_array($char, $this->negatives)) {
-                        $this->negatives[] = $char;
-                    }
-                }
-
-            }
-            elseif (in_array($char, Operator::TYPES)) {
-                $this->operators++;
-            }
-        }
-        $this->prefix();
     }
 
     /**
@@ -98,10 +119,10 @@ class Implies
     /**
      * @throws Exceptions\StackException
      */
-    public function table(): array
+    public function rows(): array
     {
-        if (isset($this->table)) {
-            return $this->table;
+        if (isset($this->rows)) {
+            return $this->rows;
         }
         $binaries = Binary::binariesTillNumber(2** count($this->words)-1);
         $result = [];
@@ -110,6 +131,8 @@ class Implies
 
         foreach ($binaries as $binary) {
             $binary_chars = str_split($binary);
+
+            $binary_chars = $this->negatives_in_row($binary_chars);
 
             foreach (str_split($prefix) as $index => $c) {
                 if ($c === '~') continue;
@@ -137,32 +160,28 @@ class Implies
                    $stack->push(count($binary_chars) - 1);
                 }
             }
-            foreach ($this->negatives as $negative) {
-                $wordIndex = $this->getIndexOfWord($negative);
-                $res = $binary_chars[$wordIndex] === "0";
-                $binary_chars[] = intval($res);
-            }
             $result[] = implode('', $binary_chars);
         }
 
-        $this->table = $result;
+        $this->rows = $result;
 
         return $result;
     }
 
-    public function minterm(): array
+    public function minterm(): string
     {
-        if (!isset($this->table)) {
-            $this->table();
+        if (!isset($this->rows)) {
+            $this->rows();
         }
-        if (isset($this->pdnf)) {
-            return $this->pdnf;
+        if (isset($this->minterm)) {
+            $minterm = implode(',', $this->minterm);
+            return "Σ($minterm)";
         }
         $minterm = [];
 
-        $cursor = strlen($this->table[0]) - count($this->negatives);
+        $cursor = strlen($this->rows[0]) - count($this->negatives);
 
-        foreach ($this->table as $row) {
+        foreach ($this->rows as $row) {
             if ($row[$cursor - 1] === "1") {
                 $str_split = str_split($row);
                 $fields = array_splice($str_split, 0, count($this->words));
@@ -171,19 +190,24 @@ class Implies
         }
         $this->minterm = $minterm;
 
-        return $minterm;
+        $minterm = implode( ',', $minterm);
+        return "Σ($minterm)";
     }
 
-    public function maxterm(): array
+    public function maxterm(): string
     {
-        if (!isset($this->table)) {
-            $this->table();
+        if (!isset($this->rows)) {
+            $this->rows();
+        }
+        if (isset($this->maxterm)) {
+            $maxterm = implode(',', $this->maxterm);
+            return "π($maxterm)";
         }
         $maxterm = [];
 
-        $cursor = strlen($this->table[0]) - count($this->negatives);
+        $cursor = strlen($this->rows[0]) - count($this->negatives);
 
-        foreach ($this->table as $row) {
+        foreach ($this->rows as $row) {
             if ($row[$cursor - 1] === "0") {
                 $str_split = str_split($row);
                 $fields = array_splice($str_split, 0, count($this->words));
@@ -192,7 +216,8 @@ class Implies
         }
         $this->maxterm = $maxterm;
 
-        return $maxterm;
+        $maxterm = implode(',', $maxterm);
+        return "π($maxterm)";
     }
 
     protected function getIndexOfWord(string|int $item): bool|int|string
@@ -206,5 +231,48 @@ class Implies
     protected function checkIsNegative(string $item): bool
     {
         return str_contains($item, '~');
+    }
+
+    private function negatives_in_row(array $binary_chars): array
+    {
+        // Add negatives
+        foreach ($this->negatives as $negative) {
+            $wordIndex = $this->getIndexOfWord($negative);
+            $res = $binary_chars[$wordIndex] === "0";
+            $binary_chars[] = intval($res);
+        }
+        return $binary_chars;
+    }
+
+    /**
+     * Compile sentence to generate content and throw exception if it's wrong!
+     * @throws Exceptions\StackException
+     */
+    private function compiler() {
+        $this->words_compiler();
+        $this->prefix();
+    }
+
+    private function words_compiler() {
+        $sentence = $this->sentence;
+
+        for ($i = 0; $i < strlen($sentence); $i++) {
+            $char = $sentence[$i];
+            if ($char === '~') continue;
+            if (preg_match('/[a-zA-Z]/', $char)) {
+                if (!in_array($char, $this->words)) {
+                    $this->words[] = $char;
+                }
+                if ($i > 0 && $sentence[$i - 1] === '~') {
+                    if (!in_array($char, $this->negatives)) {
+                        $this->negatives[] = $char;
+                    }
+                }
+
+            }
+            elseif (in_array($char, Operator::TYPES)) {
+                $this->operators++;
+            }
+        }
     }
 }
