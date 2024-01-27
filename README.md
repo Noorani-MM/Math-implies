@@ -67,8 +67,8 @@ The `pcnf` function returns a string representing the Product of Sums Normalized
 Meanwhile, the `pcnf` property returns an array representing individual sum terms of the logical expression, with each element corresponding to a specific term obtained by adding the components of the logical statement.
 
 ```php
-$string = $implies->pcnf(); // "(~pv~qv~r)v(pv~qv~r)v(pv~qvr)"
-$array  = $implies->pcnf;   // ["(~pv~qv~r)", "(pv~qv~r)", "(pv~qvr)"]
+$string = $implies->pcnf(); // "(pv~q)"
+$array  = $implies->pcnf;   // ["(pv~q)"]
 ```
 
 ## minterm
@@ -76,8 +76,8 @@ The minterm function computes minterms for a logical statement, providing a summ
 The minterm property returns an array of individual minterms, enhancing clarity on the logical conditions.
 
 ```php
-$string = $implies->minterm(); // "Σ(1,2,3,6,7)"
-$array  = $implies->minterm;   // [1,2,3,6,7];
+$string = $implies->minterm(); // "Σ(0,1,3)"
+$array  = $implies->minterm;   // [0,1,3];
 ```
 
 ## maxterm
@@ -85,6 +85,6 @@ The maxterm function calculates maxterms for a logical statement, presenting a c
 The maxterm property returns an array of individual maxterms, contributing to a clear understanding of the logical conditions.
 
 ```php
-$string = $implies->maxterm(); // "Σ(0,4,5)"
-$array  = $implies->maxterm;   // [0,4,5]
+$string = $implies->maxterm(); // "π(2)"
+$array  = $implies->maxterm;   // [2]
 ```
