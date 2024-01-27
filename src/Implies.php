@@ -57,7 +57,7 @@ class Implies
     /**
      * @var string $prefix of the sentence to calculate content
      */
-    protected string $prefix;
+    public string $prefix;
 
     /**
      * @throws Exceptions\StackException
