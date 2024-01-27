@@ -22,7 +22,7 @@ class Implies
     /**
      * @var array $rows of the table
      */
-    protected array $rows;
+    public array $rows;
 
     /**
      * @var array $columns what column exists in the table

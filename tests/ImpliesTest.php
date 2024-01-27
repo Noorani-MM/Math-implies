@@ -20,18 +20,22 @@ class ImpliesTest extends TestCase
         $this->assertNotEquals($except2, $case1->prefix());
     }
 
-    public function testTable() {
+    /**
+     * @throws \Math\Implies\Exceptions\StackException
+     * @throws \Math\Implies\Exceptions\OperatorNotFoundException
+     */
+    public function testRows() {
         $case1 = new Implies('(p->q)^(!q->r)');
-        $table1 =  ["0001001","0011111","0101110","0111110","1000001","1010101","1101110","1111110"];
+        $table1 =  ["0001100","0011111","0100111","0110111","1001000","1011010","1100111","1110111",];
 
         $case2 = new Implies('p->q');
         $table2 =  ["001","011","100","111"];
 
         $case3 = new Implies('p->!q');
-        $table3 =  ["0011", "0110", "1011", "1100"];
+        $table3 =  ["0011","0101","1011","1100"];
 
-        $this->assertEquals($table1, $case1->table());
-        $this->assertEquals($table2, $case2->table());
-        $this->assertEquals($table3, $case3->table());
+        $this->assertEquals($table1, $case1->rows);
+        $this->assertEquals($table2, $case2->rows);
+        $this->assertEquals($table3, $case3->rows);
     }
 }
