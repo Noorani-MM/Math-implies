@@ -27,7 +27,7 @@ class Implies
     /**
      * @var array $columns what column exists in the table
      */
-    protected array $columns;
+    public array $columns;
 
     /**
      * @var array $minterm List of numbers in the table when final result is True
@@ -166,6 +166,50 @@ class Implies
         return $result;
     }
 
+    public function columns(): array
+    {
+        if (isset($this->columns)) {
+            return $this->columns;
+        }
+        $stack = new Stack();
+        $prefix = str_split($this->prefix);
+
+        foreach ($this->words as $word) {
+            $this->columns[] = $word;
+        }
+        foreach ($this->negatives as $negative) {
+            $this->columns[] = "~{$negative}";
+        }
+        foreach ($prefix as $index => $char) {
+            if ($char === '~') continue;
+            if (preg_match('/[a-zA-Z]/', $char)) {
+                if ($index > 0 && $prefix[$index - 1] == '~') {
+                    $stack->push("~{$char}");
+                }
+                else {
+                    $stack->push($char);
+                }
+            }
+            elseif (preg_match('/\d/', $char)) {
+                $item1 = $stack->pop();
+                $item2 = $stack->pop();
+                $char = str_replace(Operator::TYPES, array_keys(Operator::TYPES), $char);
+                $sentence = "({$item2} {$char} {$item1})";
+                $this->columns[] = $sentence;
+                $stack->push($sentence);
+            }
+        }
+
+        while ($stack->topOfStack() !== -1) {
+            $pop = $stack->pop();
+            if (!in_array($pop, $this->columns)) {
+                $this->columns[] = $pop;
+            }
+        }
+
+        return $this->columns;
+    }
+
     public function minterm(): string
     {
         if (isset($this->minterm)) {
@@ -247,6 +291,7 @@ class Implies
 
         // Step 2
         $this->rows();
+        $this->columns();
 
         // Step 3
         $this->minterm();
